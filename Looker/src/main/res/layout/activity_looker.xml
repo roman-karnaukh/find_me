@@ -25,26 +25,26 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="New Text"
                 android:id="@+id/tvResponce" />
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Send Request"
-                android:id="@+id/btnSendReq"
-                android:layout_gravity="center_horizontal" />
 
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/checkBox"
+                    android:layout_gravity="center_horizontal"
+                    android:checked="true" />
+
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/message"
                     android:layout_weight="1"
+                    android:windowSoftInputMode="stateHidden"
                     android:hint="Message" />
 
                 <EditText
@@ -52,6 +52,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/tokenId"
                     android:layout_weight="1"
+                    android:windowSoftInputMode="stateHidden"
                     android:hint="Token Id"
                     android:inputType="number" />
             </LinearLayout>
@@ -68,6 +69,24 @@
                 android:layout_height="wrap_content"
                 android:text="Get Customers"
                 android:id="@+id/btnGetCustomers" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Get Coordinates"
+                android:id="@+id/btnGetCoordinates"
+                android:layout_gravity="center_horizontal" />
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </Spinner>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Get Last Location"
+                android:id="@+id/btnGetLocation"
+                android:layout_gravity="center_horizontal" />
 
             <LinearLayout
                 android:orientation="horizontal"

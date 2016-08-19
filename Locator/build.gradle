@@ -1,17 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion "24.0.0"
-    useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
-        applicationId "org.roman.findme"
+        applicationId "org.roman.loc"
         minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
-
     }
     buildTypes {
         release {
@@ -22,15 +20,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.google.android.gms:play-services-gcm:9.4.0'
-    compile 'commons-io:commons-io:2.0.1'
-    //noinspection GradleCompatible
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.0.0'
-    compile 'com.google.code.gson:gson:2.7'
 }
-
-
-
-
-apply plugin: 'com.google.gms.google-services'

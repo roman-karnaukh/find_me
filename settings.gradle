@@ -1,1 +1,1 @@
-include ':Find Me', ':Looker', ':loc'
+include ':Find Me', ':Looker', ':Locator'

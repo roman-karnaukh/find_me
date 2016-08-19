@@ -17,6 +17,7 @@
 package org.roman.findme;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -44,7 +45,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RegistrationIntentService extends IntentService {
-
+    SharedPreferences sPref;
+    public static final String APP_PREFERENCES = "find_me_base";
     private static final String TAG = "RegIntentService";
     private static final String[] TOPICS = {"global"};
 
@@ -71,7 +73,6 @@ public class RegistrationIntentService extends IntentService {
             // [END get_token]
             Log.i(TAG, "GCM Registration Token: " + token);
 
-
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -79,8 +80,15 @@ public class RegistrationIntentService extends IntentService {
                 }
             });
             thread.start();
+
+
             // Subscribe to topic channels
             subscribeTopics(token[0]);
+            sPref =  getSharedPreferences(RegistrationIntentService.APP_PREFERENCES, Context.MODE_PRIVATE);
+            SharedPreferences.Editor ed = sPref.edit();
+            ed.putString("my_token", token[0]);
+            ed.commit();
+
 
             // You should store a boolean that indicates whether the generated token has been
             // sent to your server. If the boolean is false, send the token to your server,
@@ -106,6 +114,7 @@ public class RegistrationIntentService extends IntentService {
      *
      * @param token The new token.
      */
+    @SuppressWarnings("deprecation")
     private void sendRegistrationToServer(String token) {
         String device = Build.MANUFACTURER.toUpperCase() + "-"+ Build.MODEL + "_" +
                 " " + Build.VERSION.SDK_INT;
@@ -116,6 +125,11 @@ public class RegistrationIntentService extends IntentService {
         nameValuePairs.add(new BasicNameValuePair("action", "register"));
         nameValuePairs.add(new BasicNameValuePair("device", device));
 
+        makeResponse(nameValuePairs);
+
+    }
+
+    public static void makeResponse( List<NameValuePair> nameValuePairs ){
         String url = "http://task-master.zzz.com.ua/server.php";
         Log.d(TAG, "sendRequest");
         try {

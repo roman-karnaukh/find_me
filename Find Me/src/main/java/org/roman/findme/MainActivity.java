@@ -26,13 +26,20 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
-public class MainActivity extends AppCompatActivity {
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class MainActivity extends AppCompatActivity{
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     public static final String TAG = "MainActivity";
@@ -42,10 +49,17 @@ public class MainActivity extends AppCompatActivity {
     private TextView mInformationTextView;
     private boolean isReceiverRegistered;
 
+    SharedPreferences sharedPreferences;
+
+    CheckBox checkBox;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPreferences = getSharedPreferences(RegistrationIntentService.APP_PREFERENCES, Context.MODE_PRIVATE);
+
 
         mRegistrationProgressBar = (ProgressBar) findViewById(R.id.registrationProgressBar);
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
@@ -73,6 +87,20 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, RegistrationIntentService.class);
             startService(intent);
         }
+
+
+        checkBox = (CheckBox) findViewById(R.id.checkBox);
+        checkBox.setChecked(sharedPreferences.getBoolean("display_message", false));
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                SharedPreferences.Editor ed = sharedPreferences.edit();
+                ed.putBoolean("display_message", isChecked);
+                ed.commit();
+            }
+        });
+
     }
 
     @Override
@@ -115,7 +143,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-
-
 
 }

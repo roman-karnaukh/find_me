@@ -9,16 +9,16 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Find Me" />
+            <option value="$PROJECT_DIR$/Locator" />
             <option value="$PROJECT_DIR$/Looker" />
-            <option value="$PROJECT_DIR$/loc" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Find Me" />
+            <option value="$PROJECT_DIR$/Locator" />
             <option value="$PROJECT_DIR$/Looker" />
-            <option value="$PROJECT_DIR$/loc" />
           </set>
         </option>
       </GradleProjectSettings>
