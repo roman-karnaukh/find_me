@@ -28,6 +28,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -42,6 +44,7 @@ import com.google.gson.Gson;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.roman.findme.location_service.LocationService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +59,8 @@ public class MyGcmListenerService extends GcmListenerService {
     public static String senderToken = null;
     SharedPreferences sharedPreferences;
     public static String myToken = null;
-    find_me myCoordinatesTask;
+    public static Context mContext = null;
+
 
     /**
      * Called when message is received.
@@ -70,6 +74,7 @@ public class MyGcmListenerService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         sharedPreferences = getSharedPreferences(RegistrationIntentService.APP_PREFERENCES, Context.MODE_PRIVATE);
         myToken = sharedPreferences.getString("my_token", null);
+        mContext = this;
 
         String message = data.getString("message");
         assert message != null;
@@ -78,7 +83,7 @@ public class MyGcmListenerService extends GcmListenerService {
         String[] response = gson.fromJson(message, String[].class);
 
         message = response[0];
-        senderToken = response[1].replaceAll("\\s+","");
+        senderToken = response[1].replaceAll("\\s+", "");
 
         Log.d(TAG, data.toString());
         Log.d(TAG, message);
@@ -92,13 +97,13 @@ public class MyGcmListenerService extends GcmListenerService {
 
 
         if (message.equals("c")) {
-            getCoordinates();
+            Intent locationService = new Intent(this, LocationService.class);
+            startService(locationService);
         } else {
             sendNotification(message);
         }
 
     }
-
 
 
     /**
@@ -127,197 +132,24 @@ public class MyGcmListenerService extends GcmListenerService {
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
 
-        if(sharedPreferences.getBoolean("display_message", true)){
+        if (sharedPreferences.getBoolean("display_message", true)) {
             displayMessage(message);
         }
     }
 
-    void displayMessage(String message){
-       if(MessageActivity.active){
-           MessageActivity.addSenderMessage(message);
-       }else{
-           Intent intent = new Intent(this, MessageActivity.class);
-           intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-           intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-           intent.putExtra("message", message);
-           startActivity(intent);
-       }
+    void displayMessage(String message) {
+        if (MessageActivity.active) {
+            MessageActivity.addSenderMessage(message);
+        } else {
+            Intent intent = new Intent(this, MessageActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("message", message);
+            startActivity(intent);
+        }
 
     }
 
-    /*****************Location****************/
-    private LocationManager locationManager = null;
-    private LocationListener locationListenerNetwork = null;
-    private LocationListener locationListenerGPS = null;
 
 
-    void getCoordinates() {
-
-        myCoordinatesTask = new find_me();
-        myCoordinatesTask.execute();
-    }
-
-    void stopSendCoordinates() {
-
-    }
-
-    class find_me extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            locationManager = (LocationManager)
-                    getSystemService(Context.LOCATION_SERVICE);
-            locationListenerGPS = new MyGPSLocationListener();
-            locationListenerNetwork = new MyNetworkLocationListener();
-
-
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Looper.prepare();
-                    if (ActivityCompat.checkSelfPermission(MyGcmListenerService.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MyGcmListenerService.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-                    locationManager.requestLocationUpdates(LocationManager
-                            .NETWORK_PROVIDER, 0, 0, locationListenerGPS);
-                    locationManager.requestLocationUpdates(LocationManager
-                            .GPS_PROVIDER, 0, 0, locationListenerNetwork);
-
-//                   locationManager.removeUpdates(locationListener);
-                    Looper.loop();
-                }
-            });
-            t.start();
-
-            return null;
-        }
-    }
-
-
-    private class MyNetworkLocationListener implements LocationListener {
-        @Override
-        public void onLocationChanged(Location loc) {
-            Toast.makeText(getBaseContext(), "Location changed : Lat: " +
-                            loc.getLatitude() + " Lng: " + loc.getLongitude(),
-                    Toast.LENGTH_SHORT).show();
-
-            double longitude = loc.getLongitude();
-            Log.v(TAG, "Longitude: " + longitude);
-            double latitude = loc.getLatitude();
-            Log.v(TAG, "Latitude: " + latitude);
-
-    /*----------to get City-Name from coordinates ------------- */
-            String cityName = null;
-            Geocoder gcd = new Geocoder(getBaseContext(),
-                    Locale.ENGLISH);
-            List<Address> addresses;
-            try {
-                addresses = gcd.getFromLocation(loc.getLatitude(), loc
-                        .getLongitude(), 1);
-                if (addresses.size() > 0)
-                    System.out.println(addresses.get(0).getLocality());
-                cityName = addresses.get(0).getLocality();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            sendMyLocation(longitude, latitude, cityName);
-            if (ActivityCompat.checkSelfPermission(MyGcmListenerService.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MyGcmListenerService.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            locationManager.removeUpdates(locationListenerNetwork);
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            // TODO Auto-generated method stub
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            // TODO Auto-generated method stub
-        }
-
-        @Override
-        public void onStatusChanged(String provider,
-                                    int status, Bundle extras) {
-            // TODO Auto-generated method stub
-        }
-
-        void sendMyLocation(double longitude, double latitude, String cityName){
-
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("action", "coordinates"));
-            nameValuePairs.add(new BasicNameValuePair("latitude", String.valueOf(latitude)));
-            nameValuePairs.add(new BasicNameValuePair("longitude", String.valueOf(longitude)));
-            nameValuePairs.add(new BasicNameValuePair("cityName", cityName));
-            nameValuePairs.add(new BasicNameValuePair("token", myToken));
-
-            makeResponse(nameValuePairs);
-        }
-    }
-
-    private class MyGPSLocationListener implements LocationListener {
-
-        @Override
-        public void onLocationChanged(Location loc) {
-            Toast.makeText(getBaseContext(), "Location changed : Lat: " +
-                            loc.getLatitude() + " Lng: " + loc.getLongitude(),
-                    Toast.LENGTH_SHORT).show();
-
-            double longitude = loc.getLongitude();
-            Log.v(TAG, "Longitude: " + longitude);
-            double latitude = loc.getLatitude();
-            Log.v(TAG, "Latitude: " + latitude);
-
-    /*----------to get City-Name from coordinates ------------- */
-            String cityName = null;
-            Geocoder gcd = new Geocoder(getBaseContext(),
-                    Locale.ENGLISH);
-            List<Address> addresses;
-            try {
-                addresses = gcd.getFromLocation(loc.getLatitude(), loc
-                        .getLongitude(), 1);
-                if (addresses.size() > 0)
-                    System.out.println(addresses.get(0).getLocality());
-                cityName = addresses.get(0).getLocality();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            sendMyLocation(longitude, latitude, cityName);
-            if (ActivityCompat.checkSelfPermission(MyGcmListenerService.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MyGcmListenerService.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            locationManager.removeUpdates(locationListenerGPS);
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            // TODO Auto-generated method stub
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            // TODO Auto-generated method stub
-        }
-
-        @Override
-        public void onStatusChanged(String provider,
-                                    int status, Bundle extras) {
-            // TODO Auto-generated method stub
-        }
-
-        void sendMyLocation(double longitude, double latitude, String cityName){
-
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("action", "coordinates"));
-            nameValuePairs.add(new BasicNameValuePair("latitude", String.valueOf(latitude)));
-            nameValuePairs.add(new BasicNameValuePair("longitude", String.valueOf(longitude)));
-            nameValuePairs.add(new BasicNameValuePair("cityName", cityName));
-            nameValuePairs.add(new BasicNameValuePair("token", myToken));
-
-            makeResponse(nameValuePairs);
-        }
-    }
 }

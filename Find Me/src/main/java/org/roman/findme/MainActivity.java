@@ -16,6 +16,8 @@
 
 package org.roman.findme;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,17 +38,21 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.roman.findme.location_service.AlarmReceiver;
+import org.roman.findme.location_service.Constants;
 
-public class MainActivity extends AppCompatActivity{
+import java.util.Calendar;
+
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    public static final String TAG = "MainActivity";
+    public static final String TAG = Constants.TAG;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private ProgressBar mRegistrationProgressBar;
     private TextView mInformationTextView;
+    private Button btnAlarmService, btnStopAlarmSevice;
     private boolean isReceiverRegistered;
 
     SharedPreferences sharedPreferences;
@@ -101,6 +107,12 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
+        btnAlarmService = (Button) findViewById(R.id.btnAlarmService);
+        btnAlarmService.setOnClickListener(this);
+
+        btnStopAlarmSevice = (Button) findViewById(R.id.btnStopAlarmSevice);
+        btnStopAlarmSevice.setOnClickListener(this);
+
     }
 
     @Override
@@ -123,11 +135,7 @@ public class MainActivity extends AppCompatActivity{
             isReceiverRegistered = true;
         }
     }
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
+
     private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
@@ -144,4 +152,43 @@ public class MainActivity extends AppCompatActivity{
         return true;
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btnAlarmService:
+                Log.d(TAG, "btnAlarmService");
+
+                startLocationService();
+                break;
+            case R.id.btnStopAlarmSevice:
+                Log.d(TAG, "btnStopAlarmSevice");
+
+                stopLocationService();
+                break;
+            default:
+                break;
+        }
+    }
+
+    void startLocationService(){
+//        Intent intent = new Intent(this, AndroidLocationServices.class);
+//        startService(intent);
+
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this,
+                1253, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarm.cancel(pendingIntent);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 1000*30, pendingIntent);
+
+    }
+
+    void stopLocationService(){
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1253, intent,  0);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+    }
 }

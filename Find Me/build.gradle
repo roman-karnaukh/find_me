@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 23
     buildToolsVersion "24.0.0"
-    useLibrary  'org.apache.http.legacy'
+    useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "org.roman.findme"
@@ -23,12 +23,14 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.google.android.gms:play-services-gcm:9.4.0'
-    compile 'commons-io:commons-io:2.0.1'
     //noinspection GradleCompatible
+     compile 'com.google.android.gms:play-services-gcm:9.4.0'
+    compile 'commons-io:commons-io:2.0.1'
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'com.google.code.gson:gson:2.7'
+    compile 'com.android.support:design:23.4.0'
 }
+
 
 
 

@@ -3,6 +3,7 @@ package org.roman.loker;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -15,9 +16,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -106,7 +105,7 @@ public class LookerActivity extends Activity implements View.OnClickListener{
 
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setPrompt("Title");
+        spinner.setPrompt("Choice coordinates you interested");
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
@@ -120,8 +119,6 @@ public class LookerActivity extends Activity implements View.OnClickListener{
                     Uri uri = Uri.parse(coordinates);
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
-
-//                    Toast.makeText(getBaseContext(), "Position = " + position + value + coordinates, Toast.LENGTH_SHORT).show();
                 }
 
                     isAuto = false;
@@ -249,8 +246,9 @@ public class LookerActivity extends Activity implements View.OnClickListener{
                 case GET_COORDINATES:
                     places = getPlaces(downloadedString);
 
-                    adapter = new ArrayAdapter<String>(LookerActivity.this, android.R.layout.simple_spinner_item, places);
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    adapter = new ArrayAdapter<String>(LookerActivity.this, R.layout.spinner_item, places);
+//                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
                     spinner.setAdapter(adapter);
                     break;
