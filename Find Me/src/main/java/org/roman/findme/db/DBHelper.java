@@ -25,7 +25,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table notSendetCoordinates ("
                 + "id integer primary key autoincrement,"
                 + "latitude text,"
-                + "longitude text" + ");");
+                + "longitude text,"
+                + "time text" + ");");
 
     }
 

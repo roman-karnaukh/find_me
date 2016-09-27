@@ -78,13 +78,16 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action
-                    android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
         <service
             android:name=".location_service.LocationService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".location_service.GPSTracker"
             android:enabled="true"
             android:exported="true"></service>
     </application>

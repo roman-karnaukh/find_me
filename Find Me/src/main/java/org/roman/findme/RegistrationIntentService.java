@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmPubSub;
@@ -98,12 +99,15 @@ public class RegistrationIntentService extends IntentService {
     private void sendRegistrationToServer(String token) {
         String device = Build.MANUFACTURER.toUpperCase() + "-"+ Build.MODEL + "_" +
                 " " + Build.VERSION.SDK_INT;
-
+        String uid = Build.SERIAL;
+        Log.i("TAG","android.os.Build.SERIAL: " + Build.SERIAL);
+        Log.d(TAG, "uid " + uid);
 
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("token", token));
         nameValuePairs.add(new BasicNameValuePair("action", "register"));
         nameValuePairs.add(new BasicNameValuePair("device", device));
+        nameValuePairs.add(new BasicNameValuePair("uid", uid));
 
         makeResponse(nameValuePairs);
 
@@ -116,7 +120,6 @@ public class RegistrationIntentService extends IntentService {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(url);
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
 
             HttpResponse response = httpclient.execute(httppost);
             InputStream in = response.getEntity().getContent();

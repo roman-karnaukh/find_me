@@ -3,7 +3,6 @@ package org.roman.loker;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -200,7 +199,7 @@ public class LookerActivity extends Activity implements View.OnClickListener{
                 nameValuePairs.clear();
                 nameValuePairs.add(new BasicNameValuePair("action", "get_coordinates"));
                 if(!tokenId.equals("")){
-                    nameValuePairs.add(new BasicNameValuePair("token", getToken(tokenId)));
+                    nameValuePairs.add(new BasicNameValuePair("uid", getToken(tokenId)[1]));
                 }
                 Log.d(TAG, "tokenId "  + tokenId);
                 mt = new MyTask();
@@ -289,7 +288,7 @@ public class LookerActivity extends Activity implements View.OnClickListener{
 
 
     private void sendPush(String message, String tokenId){
-        String token = getToken(tokenId);
+        String token = getToken(tokenId)[0];
 
         String[] array = {message, myToken};
         Gson gson = new Gson();
@@ -329,8 +328,7 @@ public class LookerActivity extends Activity implements View.OnClickListener{
             InputStream inputStream = conn.getInputStream();
             String resp = IOUtils.toString(inputStream);
                 pushResult[1] = resp;
-            System.out.println("Check your device/emulator for notification or logcat for " +
-                    "confirmation of the receipt of the GCM message.");
+
         } catch (IOException e) {
             System.out.println("Unable to send GCM message.");
             System.out.println("Please ensure that API_KEY has been replaced by the server " +
@@ -373,20 +371,22 @@ public class LookerActivity extends Activity implements View.OnClickListener{
         return downloadedString;
     }
 
-    static String getToken(String tokenId){
+    static String[] getToken(String tokenId){
+        String UID = null;
         String token = null;
         try{
             JSONObject jsonObject = new JSONObject(jSonForTokenExecute);
+            UID =  jsonObject.getJSONObject("customer" + tokenId).getString("uid");
             token =  jsonObject.getJSONObject("customer" + tokenId).getString("token");
 
         }catch (JSONException err){
 
         }catch (NullPointerException e){
-            token = "c-lvW1rZH0Q:APA91bH9GMOYne2KZ0Et49lN4ABQNbWdB6RXMyCnpMWnWVFSTDcCBabBkYI2WtBfCPIUpLncpgQ2kpbcY_5ToXKikKfVd-xWZS_rD3MnFZclw0_BJHmSKkD4VItzdwBirvQ91lT-Le3O";
+            UID = "TA2400146V";
         }
 
-        Log.d(TAG, "getToken "  + token);
-        return token;
+        Log.d(TAG, "getToken "  + "UID " + UID + "token " + token);
+        return new String[]{token, UID};
     }
 
     private static String parseCoordinates(String input) {
@@ -476,12 +476,11 @@ public class LookerActivity extends Activity implements View.OnClickListener{
     }
 
     String getMyToken(){
-        String device = Build.MANUFACTURER.toUpperCase() + "-"+ Build.MODEL + "_" +
-                " " + Build.VERSION.SDK_INT;
+        String uid = Build.SERIAL;
 
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("action", "get_my_token"));
-        nameValuePairs.add(new BasicNameValuePair("device", device));
+        nameValuePairs.add(new BasicNameValuePair("uid", uid));
         return sendRequest(nameValuePairs);
     }
 }

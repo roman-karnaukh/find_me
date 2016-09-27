@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnAlarmService = (Button) findViewById(R.id.btnAlarmService);
         btnAlarmService.setOnClickListener(this);
 
-        btnStopAlarmSevice = (Button) findViewById(R.id.btnStopAlarmSevice);
+        btnStopAlarmSevice = (Button) findViewById(R.id.btnStopAlarmService);
         btnStopAlarmSevice.setOnClickListener(this);
 
     }
@@ -153,15 +153,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
         switch (v.getId()){
             case R.id.btnAlarmService:
                 Log.d(TAG, "btnAlarmService");
 
                 startLocationService();
                 break;
-            case R.id.btnStopAlarmSevice:
-                Log.d(TAG, "btnStopAlarmSevice");
+            case R.id.btnStopAlarmService:
+                Log.d(TAG, "btnStopAlarmService");
 
                 stopLocationService();
                 break;
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         calendar.setTimeInMillis(System.currentTimeMillis());
         AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarm.cancel(pendingIntent);
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 1000*30, pendingIntent);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, pendingIntent);
 
     }
 
